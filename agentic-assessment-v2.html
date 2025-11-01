@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Agentic Readiness Assessment v2.0</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+.container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 30px; text-align: center; }
+.header h1 { font-size: 32px; margin-bottom: 10px; }
+.header .version { font-size: 14px; opacity: 0.9; margin-top: 5px; }
+.progress-bar { background: #e5e7eb; height: 8px; border-radius: 4px; margin: 20px 30px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); transition: width 0.5s; }
+.tabs { display: flex; background: #e8e8e8; border-bottom: 2px solid #ccc; overflow-x: auto; }
+.tab { padding: 12px 20px; cursor: pointer; border: none; background: #e8e8e8; font-size: 13px; white-space: nowrap; transition: all 0.3s; position: relative; }
+.tab:hover:not(.locked) { background: #d8d8d8; }
+.tab.active { background: white; border-top: 3px solid #4285f4; }
+.tab.locked { opacity: 0.5; cursor: not-allowed; color: #999; }
+.tab.completed::after { content: '✓'; margin-left: 5px; color: #10b981; font-weight: bold; }
+.tab.locked::before { content: '🔒'; margin-right: 5px; }
+.tab-content { display: none; padding: 30px; min-height: 500px; }
+.tab-content.active { display: block; }
+h1 { font-size: 28px; margin-bottom: 10px; text-align: center; color: #1f2937; }
+h2 { font-size: 22px; margin: 30px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; color: #374151; }
+h3 { font-size: 18px; margin: 20px 0 10px 0; color: #4b5563; }
+.subtitle { text-align: center; font-style: italic; color: #6b7280; margin-bottom: 30px; font-size: 16px; }
+.info-box { background: #eff6ff; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #3b82f6; }
+.warning-box { background: #fef3c7; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #f59e0b; }
+.error-box { background: #fee2e2; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ef4444; }
+.success-box { background: #d1fae5; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #10b981; }
+.question-card { background: #f9fafb; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #e5e7eb; }
+.question-text { font-weight: 600; font-size: 16px; margin-bottom: 10px; color: #1f2937; }
+.question-subtext { font-size: 14px; color: #6b7280; font-style: italic; margin-bottom: 15px; }
+.rating-options { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
+.rating-option { flex: 1; min-width: 150px; padding: 12px; border: 2px solid #d1d5db; border-radius: 6px; cursor: pointer; transition: all 0.3s; text-align: center; }
+.rating-option:hover { border-color: #3b82f6; background: #eff6ff; }
+.rating-option.selected { border-color: #3b82f6; background: #dbeafe; font-weight: 600; }
+.rating-value { display: block; font-size: 20px; font-weight: bold; color: #3b82f6; margin-bottom: 5px; }
+.rating-label { display: block; font-size: 13px; color: #4b5563; }
+.red-flag-alert { background: #fef2f2; border: 2px solid #ef4444; padding: 15px; border-radius: 6px; margin-top: 15px; display: none; }
+.red-flag-alert.show { display: block; animation: slideDown 0.3s; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.score-summary { background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; }
+.score-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #d1d5db; }
+.score-row:last-child { border-bottom: none; font-weight: bold; font-size: 18px; }
+.gate-container { text-align: center; padding: 40px 20px; }
+.gate-visual { font-size: 120px; margin: 30px 0; }
+.gate-status { font-size: 32px; font-weight: bold; margin: 20px 0; }
+.gate-status.pass { color: #10b981; }
+.gate-status.fail { color: #ef4444; }
+.gate-message { font-size: 18px; color: #4b5563; margin: 20px 0; }
+.gate-button { padding: 15px 40px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; margin: 20px 10px; transition: all 0.3s; }
+.gate-button.primary { background: #10b981; color: white; }
+.gate-button.primary:hover { background: #059669; }
+.gate-button.secondary { background: #6b7280; color: white; }
+.gate-button.secondary:hover { background: #4b5563; }
+.red-flag-list { text-align: left; max-width: 600px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; }
+.red-flag-item { padding: 15px; margin: 10px 0; background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 4px; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0; }
+.metric-card { background: #f9fafb; padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6; }
+.metric-value { font-size: 36px; font-weight: bold; color: #3b82f6; margin: 10px 0; }
+.btn { background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; margin: 10px 5px; font-size: 14px; }
+.btn:hover { background: #2563eb; }
+.footer { background: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; margin-top: 40px; border-top: 1px solid #e5e7eb; }
+.footer a { color: #3b82f6; text-decoration: none; }
+ul, ol { margin: 15px 0 15px 30px; line-height: 1.8; }
+.tooltip { position: relative; display: inline-block; cursor: help; color: #3b82f6; margin-left: 5px; }
+.tooltip .tooltiptext { visibility: hidden; width: 250px; background-color: #1f2937; color: white; text-align: center; border-radius: 6px; padding: 10px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -125px; opacity: 0; transition: opacity 0.3s; font-size: 12px; }
+.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+.input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; margin-top: 10px; }
+@media (max-width: 768px) {
+  .tooltip .tooltiptext { width: 200px; margin-left: -100px; }
+  .rating-option { min-width: 100%; flex: 1 1 100%; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+@media print {
+  .tabs, .header, .progress-bar, .btn, .footer { display: none; }
+  .tab-content { display: block !important; page-break-inside: avoid; }
+  #dashboard { display: block !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+<h1>THE COMPLETE AGENTIC READINESS ASSESSMENT</h1>
+<div class="version">Version 2.0 | November 2025</div>
+<div style="margin-top: 10px; font-size: 13px;">Developed by Muhammad Arshi Wasique</div>
+<div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">Integrating Economic Validation (Phase 0) with GESR Operational Readiness (Phase 1)</div>
+</div>
+
+<div class="progress-bar">
+<div class="progress-fill" id="overall-progress" style="width: 0%;"></div>
+</div>
+
+<div class="tabs">
+<button class="tab active" data-tab="instructions">Instructions</button>
+<button class="tab" data-tab="phase0">Phase 0: Economic Validation</button>
+<button class="tab locked" data-tab="gate">Decision Gate</button>
+<button class="tab locked" data-tab="governance">Governance</button>
+<button class="tab locked" data-tab="ethics">Ethics</button>
+<button class="tab locked" data-tab="safety">Safety</button>
+<button class="tab locked" data-tab="responsibility">Responsibility</button>
+<button class="tab locked" data-tab="dashboard">Dashboard</button>
+<button class="tab locked" data-tab="action">Action Planning</button>
+</div>
+
+<div id="instructions" class="tab-content active">
+<h1>Welcome to the Complete Agentic Readiness Assessment</h1>
+<p class="subtitle">A Two-Phase Framework for Evaluating AI Agent Deployment Readiness</p>
+
+<div class="info-box">
+<h3>🎯 What is This Assessment?</h3>
+<p>This assessment helps organizations make TWO critical decisions before deploying autonomous AI agents:</p>
+<ol>
+<li><strong>SHOULD we build this agent?</strong> (Phase 0: Economic & Process Validation)</li>
+<li><strong>CAN we govern it responsibly?</strong> (Phase 1: GESR Operational Readiness)</li>
+</ol>
+</div>
+
+<h2>Assessment Structure</h2>
+
+<div class="info-box" style="background: #fef3c7; border-left-color: #f59e0b;">
+<h3>PHASE 0: Economic & Process Validation (NEW)</h3>
+<p><strong>12 questions | 48 points maximum | ~15 minutes</strong></p>
+<p>Validates that:</p>
+<ul>
+<li>The manual process delivers documented ROI</li>
+<li>The process is mature and stable enough to automate</li>
+<li>Your organization has discipline to manage the investment</li>
+</ul>
+<p><strong>⚠️ CRITICAL:</strong> You must score 40+ points with NO red flags to proceed to Phase 1</p>
+</div>
+
+<div class="info-box" style="background: #dbeafe; border-left-color: #3b82f6;">
+<h3>PHASE 1: GESR Operational Readiness</h3>
+<p><strong>32 questions | 64 points maximum | ~30 minutes</strong></p>
+<p>Evaluates your readiness across four dimensions:</p>
+<ul>
+<li><strong>Governance:</strong> Who controls this agent and how?</li>
+<li><strong>Ethics:</strong> Is this agent aligned with values?</li>
+<li><strong>Safety:</strong> What could go wrong?</li>
+<li><strong>Responsibility:</strong> Who answers when things fail?</li>
+</ul>
+<p><strong>Note:</strong> Only accessible after passing Phase 0</p>
+</div>
+
+<h2>How to Use This Assessment</h2>
+<ol>
+<li><strong>Assemble Your Team</strong> (90-minute session recommended):
+<ul>
+<li>Business owners & process stakeholders</li>
+<li>AI/ML technical teams</li>
+<li>Finance representative</li>
+<li>Security & compliance</li>
+<li>Ethics or Responsible AI functions</li>
+</ul>
+</li>
+<li><strong>Complete Phase 0</strong> - Be honest about process maturity and economics</li>
+<li><strong>Review Decision Gate</strong> - Assess whether to proceed</li>
+<li><strong>Complete Phase 1</strong> (if Phase 0 passes) - Evaluate operational readiness</li>
+<li><strong>Review Dashboard</strong> - See overall readiness and recommendations</li>
+<li><strong>Create Action Plan</strong> - Document next steps</li>
+</ol>
+
+<h2>Scoring Philosophy</h2>
+<div class="info-box">
+<p><strong>Phase 0 uses 0-4 scale:</strong></p>
+<ul>
+<li><strong>4:</strong> Excellent - well-established and proven</li>
+<li><strong>3:</strong> Good - mostly in place</li>
+<li><strong>2:</strong> Fair - partially implemented</li>
+<li><strong>1:</strong> Poor - minimal implementation</li>
+<li><strong>0:</strong> None - does not exist</li>
+</ul>
+<p style="margin-top: 15px;"><strong>Phase 1 uses 0-2 scale:</strong></p>
+<ul>
+<li><strong>2:</strong> YES - fully in place</li>
+<li><strong>1:</strong> PARTIAL - exists but incomplete</li>
+<li><strong>0:</strong> NO - does not exist</li>
+</ul>
+</div>
+
+<div class="warning-box">
+<h3>⚠️ Important Notes</h3>
+<ul>
+<li><strong>Be honest</strong> - Finding gaps is the goal, not achieving a perfect score</li>
+<li><strong>Red flags matter</strong> - Certain gaps automatically disqualify proceeding, regardless of overall score</li>
+<li><strong>This is a conversation starter</strong> - Not a certification or compliance requirement</li>
+<li><strong>Reassess regularly</strong> - Every 90 days as capabilities and risks evolve</li>
+</ul>
+</div>
+
+<div style="text-align: center; margin: 40px 0;">
+<button class="btn" onclick="switchTab('phase0')" style="font-size: 18px; padding: 15px 40px;">BEGIN PHASE 0 ASSESSMENT →</button>
+</div>
+
+<div class="footer">
+<p><strong>Developed by Muhammad Arshi Wasique</strong> | GM EMEA Ops @ThreatCure | vCISO</p>
+<p style="margin-top: 5px;">Cyber Security + AI Risk Watch | <a href="https://www.linkedin.com/in/arshiw" target="_blank">linkedin.com/in/arshiw</a></p>
+<p style="margin-top: 10px; font-size: 11px;">
+<a href="https://www.linkedin.com/pulse/before-you-govern-agent-ask-should-build-katie-milton-jordan-mba-xkrlc/" target="_blank" style="color: #3b82f6;">Phase 0: Economic Validation Framework</a> • 
+<a href="https://www.linkedin.com/pulse/ai-model-security-from-static-assets-autonomous-agents-wasique-a1c0f/L" target="_blank" style="color: #3b82f6;">Phase 1: GESR Operational Readiness</a>
+</p>
+</div>
+</div>
+
+<div id="phase0" class="tab-content">
+<h1>PHASE 0: Economic & Process Validation</h1>
+<p class="subtitle">Prerequisite Assessment - Must Pass to Proceed to Phase 1</p>
+
+<div class="warning-box">
+<strong>⚠️ Critical Gate:</strong> You must score 40+ points (out of 48) with NO red flags to proceed to operational readiness assessment.
+</div>
+
+<div class="score-summary">
+<div class="score-row">
+<span>Phase 0 Progress:</span>
+<span id="phase0-progress">0 / 12 questions answered</span>
+</div>
+<div class="score-row">
+<span>Current Score:</span>
+<span id="phase0-current">0 / 48 points</span>
+</div>
+<div class="score-row">
+<span>Red Flags:</span>
+<span id="phase0-redflags" style="color: #ef4444;">0 detected</span>
+</div>
+</div>
+
+<h2>Section 1: Economic Validation</h2>
+
+<div class="question-card">
+<div class="question-text">1.1 Manual Process ROI Documentation
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Does your current manual process generate measurable, documented return on investment?</span>
+</span>
+</div>
+<div class="question-subtext">Does this process generate measurable, documented ROI when humans execute it?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-1-1" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">No ROI data exists</span>
+</div>
+<div class="rating-option" data-question="p0-1-1" data-value="1" data-redflag="true">
+<span class="rating-value">1</span>
+<span class="rating-label">Informal estimates only</span>
+</div>
+<div class="rating-option" data-question="p0-1-1" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Some documentation</span>
+</div>
+<div class="rating-option" data-question="p0-1-1" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Regular ROI tracking</span>
+</div>
+<div class="rating-option" data-question="p0-1-1" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Proven ROI with track record</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-1-1">
+🚨 <strong>RED FLAG:</strong> No ROI documentation - process not ready for automation
+</div>
+</div>
+
+<div class="question-card">
+<div class="question-text">1.2 Process Consistency & Reliability
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Is the manual process reliable, or does quality vary significantly between executions?</span>
+</span>
+</div>
+<div class="question-subtext">Is the manual process reliable and repeatable, or does quality vary significantly?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-1-2" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">Highly inconsistent</span>
+</div>
+<div class="rating-option" data-question="p0-1-2" data-value="1">
+<span class="rating-value">1</span>
+<span class="rating-label">Frequent variations</span>
+</div>
+<div class="rating-option" data-question="p0-1-2" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Moderate consistency</span>
+</div>
+<div class="rating-option" data-question="p0-1-2" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Mostly consistent</span>
+</div>
+<div class="rating-option" data-question="p0-1-2" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Highly reliable</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-1-2">
+🚨 <strong>RED FLAG:</strong> Fix manual process reliability before automating
+</div>
+</div>
+
+<div class="question-card">
+<div class="question-text">1.3 Agent Build Cost Analysis
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Have you estimated total costs including build, deployment, and ongoing maintenance?</span>
+</span>
+</div>
+<div class="question-subtext">Have you estimated the total cost to build, deploy, and maintain the agent?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-1-3" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">No cost estimate</span>
+</div>
+<div class="rating-option" data-question="p0-1-3" data-value="1" data-redflag="true">
+<span class="rating-value">1</span>
+<span class="rating-label">Rough guess</span>
+</div>
+<div class="rating-option" data-question="p0-1-3" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Preliminary budget</span>
+</div>
+<div class="rating-option" data-question="p0-1-3" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Detailed cost analysis</span>
+</div>
+<div class="rating-option" data-question="p0-1-3" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Validated business case</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-1-3">
+🚨 <strong>RED FLAG:</strong> Cannot proceed without cost analysis
+</div>
+</div>
+
+<div class="question-card">
+<div class="question-text">1.4 ROI Break-Even Timeline
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Does agent ROI exceed build costs within acceptable timeframe for your organization?</span>
+</span>
+</div>
+<div class="question-subtext">Does the agent ROI exceed build costs within an acceptable timeframe?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-1-4" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">Economics don't work</span>
+</div>
+<div class="rating-option" data-question="p0-1-4" data-value="1" data-redflag="true">
+<span class="rating-value">1</span>
+<span class="rating-label">Marginal economics</span>
+</div>
+<div class="rating-option" data-question="p0-1-4" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Acceptable ROI (18-24mo)</span>
+</div>
+<div class="rating-option" data-question="p0-1-4" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Strong ROI (12-18mo)</span>
+</div>
+<div class="rating-option" data-question="p0-1-4" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Compelling ROI (<12mo)</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-1-4">
+🚨 <strong>RED FLAG:</strong> Economics don't justify automation
+</div>
+</div>
+
+<h2>Section 2: Process Maturity</h2>
+
+<div class="question-card">
+<div class="question-text">2.1 Process Documentation
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Is the manual process documented well enough to replicate in automation?</span>
+</span>
+</div>
+<div class="question-subtext">Is the manual process documented well enough to automate?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-2-1" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">Not documented</span>
+</div>
+<div class="rating-option" data-question="p0-2-1" data-value="1">
+<span class="rating-value">1</span>
+<span class="rating-label">Minimal documentation</span>
+</div>
+<div class="rating-option" data-question="p0-2-1" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Working documentation</span>
+</div>
+<div class="rating-option" data-question="p0-2-1" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Comprehensive docs</span>
+</div>
+<div class="rating-option" data-question="p0-2-1" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Living documentation</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-2-1">
+🚨 <strong>RED FLAG:</strong> Document process thoroughly first
+</div>
+</div>
+
+<div class="question-card">
+<div class="question-text">2.2 Process Stability
+<span class="tooltip">ℹ️
+<span class="tooltiptext">How long has this process existed in its current form?</span>
+</span>
+</div>
+<div class="question-subtext">How long has this process existed in its current form?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-2-2" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">Brand new (<3mo)</span>
+</div>
+<div class="rating-option" data-question="p0-2-2" data-value="1" data-redflag="true">
+<span class="rating-value">1</span>
+<span class="rating-label">Early stage (3-6mo)</span>
+</div>
+<div class="rating-option" data-question="p0-2-2" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Established (6-12mo)</span>
+</div>
+<div class="rating-option" data-question="p0-2-2" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Mature (1-2yr)</span>
+</div>
+<div class="rating-option" data-question="p0-2-2" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Well-established (2+yr)</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-2-2">
+🚨 <strong>RED FLAG:</strong> Process too new to automate safely
+</div>
+</div>
+
+<div class="question-card">
+<div class="question-text">2.3 Exception Handling
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Can you clearly define and handle edge cases?</span>
+</span>
+</div>
+<div class="question-subtext">Can you clearly define and handle edge cases and exceptions?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-2-3" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">Unknown exceptions</span>
+</div>
+<div class="rating-option" data-question="p0-2-3" data-value="1">
+<span class="rating-value">1</span>
+<span class="rating-label">Aware of exceptions</span>
+</div>
+<div class="rating-option" data-question="p0-2-3" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Some documentation</span>
+</div>
+<div class="rating-option" data-question="p0-2-3" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Well-defined handling</span>
+</div>
+<div class="rating-option" data-question="p0-2-3" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Comprehensive framework</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-2-3">
+🚨 <strong>RED FLAG:</strong> Too many unknowns to automate
+</div>
+</div>
+
+<h2>Section 3: Organizational Discipline</h2>
+
+<div class="question-card">
+<div class="question-text">3.1 Historical Track Record
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Does your organization kill projects that don't deliver ROI?</span>
+</span>
+</div>
+<div class="question-subtext">Does your organization have a history of killing projects that don't deliver ROI?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-3-1" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">Never killed projects</span>
+</div>
+<div class="rating-option" data-question="p0-3-1" data-value="1" data-redflag="true">
+<span class="rating-value">1</span>
+<span class="rating-label">Rarely stopped</span>
+</div>
+<div class="rating-option" data-question="p0-3-1" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Occasionally stopped</span>
+</div>
+<div class="rating-option" data-question="p0-3-1" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Regular portfolio review</span>
+</div>
+<div class="rating-option" data-question="p0-3-1" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Disciplined culture</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-3-1">
+🚨 <strong>RED FLAG:</strong> Lack discipline to manage agent failure
+</div>
+</div>
+
+<div class="question-card">
+<div class="question-text">3.2 Measurement Infrastructure
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Do you have systems to measure agent performance post-deployment?</span>
+</span>
+</div>
+<div class="question-subtext">Do you have systems to measure agent performance and ROI post-deployment?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-3-2" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">No measurement plan</span>
+</div>
+<div class="rating-option" data-question="p0-3-2" data-value="1">
+<span class="rating-value">1</span>
+<span class="rating-label">Basic ideas</span>
+</div>
+<div class="rating-option" data-question="p0-3-2" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Measurement plan exists</span>
+</div>
+<div class="rating-option" data-question="p0-3-2" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Infrastructure ready</span>
+</div>
+<div class="rating-option" data-question="p0-3-2" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Mature analytics</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-3-2">
+🚨 <strong>RED FLAG:</strong> Can't measure if investment pays off
+</div>
+</div>
+
+<div class="question-card">
+<div class="question-text">3.3 Stakeholder Alignment
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Do key stakeholders agree this should happen and understand costs?</span>
+</span>
+</div>
+<div class="question-subtext">Do key stakeholders agree this automation should happen and understand the costs?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-3-3" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">No stakeholder buy-in</span>
+</div>
+<div class="rating-option" data-question="p0-3-3" data-value="1">
+<span class="rating-value">1</span>
+<span class="rating-label">Minimal awareness</span>
+</div>
+<div class="rating-option" data-question="p0-3-3" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">General awareness</span>
+</div>
+<div class="rating-option" data-question="p0-3-3" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Active engagement</span>
+</div>
+<div class="rating-option" data-question="p0-3-3" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Full alignment</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-3-3">
+🚨 <strong>RED FLAG:</strong> Lack organizational support for success
+</div>
+</div>
+
+<div class="question-card">
+<div class="question-text">3.4 Honest Assessment Culture
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Can your team honestly report problems without fear?</span>
+</span>
+</div>
+<div class="question-subtext">Can your team honestly report problems without fear of blame?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-3-4" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">Blame culture</span>
+</div>
+<div class="rating-option" data-question="p0-3-4" data-value="1">
+<span class="rating-value">1</span>
+<span class="rating-label">Defensive culture</span>
+</div>
+<div class="rating-option" data-question="p0-3-4" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Selective honesty</span>
+</div>
+<div class="rating-option" data-question="p0-3-4" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Generally open</span>
+</div>
+<div class="rating-option" data-question="p0-3-4" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Transparent culture</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-3-4">
+🚨 <strong>RED FLAG:</strong> Won't catch problems until too late
+</div>
+</div>
+
+<div class="question-card">
+<div class="question-text">3.5 Resource Allocation
+<span class="tooltip">ℹ️
+<span class="tooltiptext">Are sufficient resources (budget, staff, time) committed to this agent project?</span>
+</span>
+</div>
+<div class="question-subtext">Are sufficient resources allocated and committed for agent development and maintenance?</div>
+<div class="rating-options">
+<div class="rating-option" data-question="p0-3-5" data-value="0" data-redflag="true">
+<span class="rating-value">0</span>
+<span class="rating-label">No resources allocated</span>
+</div>
+<div class="rating-option" data-question="p0-3-5" data-value="1" data-redflag="true">
+<span class="rating-value">1</span>
+<span class="rating-label">Insufficient resources</span>
+</div>
+<div class="rating-option" data-question="p0-3-5" data-value="2">
+<span class="rating-value">2</span>
+<span class="rating-label">Adequate resources</span>
+</div>
+<div class="rating-option" data-question="p0-3-5" data-value="3">
+<span class="rating-value">3</span>
+<span class="rating-label">Well-resourced</span>
+</div>
+<div class="rating-option" data-question="p0-3-5" data-value="4">
+<span class="rating-value">4</span>
+<span class="rating-label">Fully committed resources</span>
+</div>
+</div>
+<div class="red-flag-alert" id="redflag-p0-3-5">
+🚨 <strong>RED FLAG:</strong> Insufficient resources to succeed
+</div>
+</div>
+
+<div style="text-align: center; margin: 40px 0;">
+<button class="btn" onclick="switchTab('gate')" style="font-size: 18px; padding: 15px 40px;">PROCEED TO DECISION GATE →</button>
+</div>
+
+<div class="footer">
+<p><strong>Phase 0: Economic & Process Validation</strong></p>
+<p style="margin-top: 5px; font-size: 11px;">Framework developed through integration of economic validation principles with operational readiness assessment</p>
+<p style="margin-top: 10px; font-size: 11px;">
+<a href="https://www.linkedin.com/pulse/before-you-govern-agent-ask-should-build-katie-milton-jordan-mba-xkrlc/" target="_blank" style="color: #3b82f6;">Phase 0: Economic Validation Framework</a> • 
+<a href="https://www.linkedin.com/pulse/ai-model-security-from-static-assets-autonomous-agents-wasique-a1c0f/L" target="_blank" style="color: #3b82f6;">Phase 1: GESR Operational Readiness</a>
+</p>
+</div>
+</div>
+
+<div id="gate" class="tab-content">
+<div class="gate-container">
+<h1>PHASE 0 DECISION GATE</h1>
+<p class="subtitle">Critical Go/No-Go Decision Point</p>
+
+<div class="gate-visual" id="gate-icon">⏳</div>
+<div class="gate-status" id="gate-status">Evaluating...</div>
+<div class="gate-message" id="gate-message">Calculating Phase 0 results...</div>
+
+<div class="score-summary" style="max-width: 500px; margin: 30px auto;">
+<div class="score-row">
+<span>Phase 0 Score:</span>
+<span id="gate-score">0 / 48</span>
+</div>
+<div class="score-row">
+<span>Questions Answered:</span>
+<span id="gate-answered">0 / 12</span>
+</div>
+<div class="score-row">
+<span>Red Flags Detected:</span>
+<span id="gate-redflags-count" style="color: #ef4444;">0</span>
+</div>
+<div class="score-row">
+<span>Maturity Level:</span>
+<span id="gate-maturity">-</span>
+</div>
+</div>
+
+<div id="gate-redflag-list" class="red-flag-list" style="display: none;">
+<h3 style="color: #ef4444; margin-bottom: 15px;">🚨 Critical Red Flags Detected</h3>
+<div id="gate-redflag-items"></div>
+</div>
+
+<div id="gate-actions" style="margin-top: 30px;">
+<button class="gate-button primary" id="gate-proceed-btn" onclick="unlockPhase1()" style="display: none;">
+✅ UNLOCK PHASE 1 (GESR Assessment)
+</button>
+<button class="gate-button secondary" id="gate-stop-btn" onclick="showRecommendations()" style="display: none;">
+📋 VIEW RECOMMENDATIONS
+</button>
+</div>
+
+<div class="info-box" id="gate-pass-message" style="display: none; max-width: 600px; margin: 30px auto;">
+<h3 style="color: #10b981;">✅ Phase 0 Assessment: PASSED</h3>
+<p style="margin-top: 10px;">Your assessment indicates this process is a viable candidate for automation. You may now proceed to Phase 1 to evaluate operational readiness across Governance, Ethics, Safety, and Responsibility.</p>
+<p style="margin-top: 15px;"><strong>Next Step:</strong> Click "Unlock Phase 1" to continue your assessment.</p>
+</div>
+
+<div class="error-box" id="gate-fail-message" style="display: none; max-width: 600px; margin: 30px auto;">
+<h3 style="color: #ef4444;">🛑 Phase 0 Assessment: NOT READY</h3>
+<p style="margin-top: 10px;">Your assessment indicates significant gaps that must be addressed before proceeding with agent development.</p>
+<p style="margin-top: 15px;"><strong>Recommendation:</strong> Focus on strengthening foundational capabilities before investing in automation.</p>
+<ul style="margin-top: 10px;">
+<li>Fix identified red flags</li>
+<li>Improve process maturity</li>
+<li>Build organizational discipline</li>
+<li>Reassess in 6-12 months</li>
+</ul>
+</div>
+</div>
+
+<div class="footer">
+<p><strong>Decision Gate: Economic & Process Validation Complete</strong></p>
+</div>
+</div>
+
+<div id="governance" class="tab-content">
+<h1>PHASE 1: GOVERNANCE LENS</h1>
+<p class="subtitle">Core Question: Who controls this agent and how?</p>
+
+<div class="info-box">
+<p><strong>Context:</strong> Given that this agent should exist (Phase 0 validated), who will control it and how?</p>
+</div>
+
+<div class="score-summary">
+<div class="score-row">
+<span>Governance Score:</span>
+<span id="gov-score">0 / 16</span>
+</div>
+</div>
+
+<div id="governance-questions"></div>
+
+<div class="footer">
+<p><strong>Phase 1: Governance Assessment</strong> | Page 4 of 9</p>
+</div>
+</div>
+
+<div id="ethics" class="tab-content">
+<h1>PHASE 1: ETHICS LENS</h1>
+<p class="subtitle">Core Question: Is this agent aligned with our values?</p>
+
+<div class="info-box">
+<p><strong>Context:</strong> Given that economics justify this agent (Phase 0), is it ethically sound?</p>
+</div>
+
+<div class="score-summary">
+<div class="score-row">
+<span>Ethics Score:</span>
+<span id="eth-score">0 / 16</span>
+</div>
+</div>
+
+<div id="ethics-questions"></div>
+
+<div class="footer">
+<p><strong>Phase 1: Ethics Assessment</strong> | Page 5 of 9</p>
+</div>
+</div>
+
+<div id="safety" class="tab-content">
+<h1>PHASE 1: SAFETY LENS</h1>
+<p class="subtitle">Core Question: What's the worst that could happen?</p>
+
+<div class="info-box">
+<p><strong>Context:</strong> Given that the process is proven (Phase 0), what could go wrong?</p>
+</div>
+
+<div class="score-summary">
+<div class="score-row">
+<span>Safety Score:</span>
+<span id="saf-score">0 / 16</span>
+</div>
+</div>
+
+<div id="safety-questions"></div>
+
+<div class="footer">
+<p><strong>Phase 1: Safety Assessment</strong> | Page 6 of 9</p>
+</div>
+</div>
+
+<div id="responsibility" class="tab-content">
+<h1>PHASE 1: RESPONSIBILITY LENS</h1>
+<p class="subtitle">Core Question: Who answers when something goes wrong?</p>
+
+<div class="info-box">
+<p><strong>Context:</strong> Given organizational discipline exists (Phase 0), who answers when things fail?</p>
+</div>
+
+<div class="score-summary">
+<div class="score-row">
+<span>Responsibility Score:</span>
+<span id="res-score">0 / 16</span>
+</div>
+</div>
+
+<div id="responsibility-questions"></div>
+
+<div class="footer">
+<p><strong>Phase 1: Responsibility Assessment</strong> | Page 7 of 9</p>
+</div>
+</div>
+
+<div id="dashboard" class="tab-content">
+<h1>COMPLETE ASSESSMENT DASHBOARD</h1>
+<p class="subtitle">Overall Readiness Summary</p>
+
+<h2>Phase 0: Economic & Process Validation</h2>
+<div class="dashboard-grid">
+<div class="metric-card">
+<h3>Total Score</h3>
+<div class="metric-value" id="dash-p0-score">0</div>
+<div>out of 48 points</div>
+</div>
+<div class="metric-card">
+<h3>Maturity Level</h3>
+<div class="metric-value" style="font-size: 24px;" id="dash-p0-maturity">-</div>
+</div>
+<div class="metric-card">
+<h3>Red Flags</h3>
+<div class="metric-value" id="dash-p0-redflags">0</div>
+</div>
+<div class="metric-card">
+<h3>Status</h3>
+<div class="metric-value" style="font-size: 20px;" id="dash-p0-status">-</div>
+</div>
+</div>
+
+<h2>Phase 1: GESR Operational Readiness</h2>
+<div class="dashboard-grid">
+<div class="metric-card">
+<h3>Governance</h3>
+<div class="metric-value" id="dash-gov">0</div>
+<div>out of 16 points</div>
+</div>
+<div class="metric-card">
+<h3>Ethics</h3>
+<div class="metric-value" id="dash-eth">0</div>
+<div>out of 16 points</div>
+</div>
+<div class="metric-card">
+<h3>Safety</h3>
+<div class="metric-value" id="dash-saf">0</div>
+<div>out of 16 points</div>
+</div>
+<div class="metric-card">
+<h3>Responsibility</h3>
+<div class="metric-value" id="dash-res">0</div>
+<div>out of 16 points</div>
+</div>
+</div>
+
+<div class="score-summary">
+<div class="score-row">
+<span>Phase 1 Total Score:</span>
+<span id="dash-p1-total">0 / 64</span>
+</div>
+<div class="score-row">
+<span>Overall Maturity:</span>
+<span id="dash-p1-maturity">-</span>
+</div>
+</div>
+
+<h2>Final Recommendation</h2>
+<div id="dash-recommendation" class="info-box">
+<p>Complete both Phase 0 and Phase 1 assessments to see your overall readiness recommendation.</p>
+</div>
+
+<div style="text-align: center; margin: 30px 0;">
+<button class="btn" onclick="window.print()">📄 Print Dashboard</button>
+<button class="btn" onclick="saveProgress()">💾 Save Progress</button>
+<button class="btn" onclick="switchTab('action')">📋 Create Action Plan</button>
+</div>
+
+<div class="footer">
+<p><strong>Complete Assessment Dashboard</strong> | Page 8 of 9</p>
+</div>
+</div>
+
+<div id="action" class="tab-content">
+<h1>ACTION PLANNING</h1>
+<p class="subtitle">Document Next Steps and Priorities</p>
+
+<div class="info-box">
+<h3>Based on Your Assessment</h3>
+<p>Use this section to document gaps identified, prioritize actions, and create a roadmap for improvement.</p>
+</div>
+
+<h2>Identified Gaps</h2>
+<div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+<p><strong>Phase 0 Gaps:</strong></p>
+<textarea class="input-field" placeholder="List key gaps from Phase 0 assessment..." style="width: 100%; min-height: 100px;"></textarea>
+
+<p style="margin-top: 20px;"><strong>Phase 1 Gaps:</strong></p>
+<textarea class="input-field" placeholder="List key gaps from Phase 1 GESR assessment..." style="width: 100%; min-height: 100px;"></textarea>
+</div>
+
+<h2>30-60-90 Day Roadmap</h2>
+
+<div style="background: #fffbf0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+<h3>Next 30 Days (Quick Wins)</h3>
+<textarea class="input-field" id="roadmap-30" placeholder="1. 
+2. 
+3. " style="width: 100%; min-height: 80px;"></textarea>
+</div>
+
+<div style="background: #fffbf0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+<h3>60 Days (Short-term Improvements)</h3>
+<textarea class="input-field" id="roadmap-60" placeholder="1. 
+2. 
+3. " style="width: 100%; min-height: 80px;"></textarea>
+</div>
+
+<div style="background: #fffbf0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+<h3>90 Days (Foundation Building)</h3>
+<textarea class="input-field" id="roadmap-90" placeholder="1. 
+2. 
+3. " style="width: 100%; min-height: 80px;"></textarea>
+</div>
+
+<div style="text-align: center; margin: 20px 0;">
+<button class="btn" onclick="saveActionPlan()">💾 Save Action Plan</button>
+</div>
+
+<h2>Stakeholder Communication</h2>
+<div style="background: #f9fafb; padding: 20px; border-radius: 8px;">
+<p><strong>Who needs these results?</strong></p>
+<p style="margin: 10px 0;"><label><input type="checkbox"> Executive leadership</label></p>
+<p style="margin: 10px 0;"><label><input type="checkbox"> Finance team</label></p>
+<p style="margin: 10px 0;"><label><input type="checkbox"> AI/ML team</label></p>
+<p style="margin: 10px 0;"><label><input type="checkbox"> Security team</label></p>
+<p style="margin: 10px 0;"><label><input type="checkbox"> Legal/Compliance</label></p>
+<p style="margin: 10px 0;"><label><input type="checkbox"> Business owners</label></p>
+</div>
+
+<h2>Next Assessment Date</h2>
+<div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+<p><strong>Schedule reassessment for:</strong></p>
+<input type="date" class="input-field" style="max-width: 300px; margin-top: 10px;">
+<p style="margin-top: 15px; color: #6b7280; font-size: 14px;">💡 Tip: Reassess every 90 days as agent capabilities evolve</p>
+</div>
+
+<div class="footer">
+<p><strong>Action Planning</strong> | Page 9 of 9</p>
+</div>
+</div>
+
+</div>
+
+<script>
+const phase0Data = {};
+const phase1Data = { governance: {}, ethics: {}, safety: {}, responsibility: {} };
+let phase0RedFlags = [];
+let phase1Unlocked = false;
+
+const phase1Questions = {
+  governance: [
+    { id: 'G1', text: 'Is there clear technical ownership (who maintains/updates the system)?' },
+    { id: 'G2', text: "Is there clear business ownership (who's accountable for outcomes)?" },
+    { id: 'G3', text: "Are the agent's operational boundaries documented?" },
+    { id: 'G4', text: 'Are boundaries technically enforced (not just policy)?' },
+    { id: 'G5', text: 'Is there a formal approval process for expanding agent capabilities?' },
+    { id: 'G6', text: 'Is there access control for who can modify agent instructions?' },
+    { id: 'G7', text: 'Are autonomous decisions vs. human-approval decisions clearly defined?' },
+    { id: 'G8', text: 'Is there a change control process for agent updates?' }
+  ],
+  ethics: [
+    { id: 'E1', text: 'Have we documented the values/principles guiding this agent?' },
+    { id: 'E2', text: "Have we tested for bias in the agent's decision-making?" },
+    { id: 'E3', text: 'Are there guardrails preventing discriminatory actions?' },
+    { id: 'E4', text: 'Have we defined which decisions require human involvement?' },
+    { id: 'E5', text: "Do users know when they're interacting with an agent vs. human?" },
+    { id: 'E6', text: 'Is there a process for handling ethical conflicts (competing values)?' },
+    { id: 'E7', text: 'Do we monitor fairness across different user groups?' },
+    { id: 'E8', text: 'Can the agent explain its reasoning for decisions?' }
+  ],
+  safety: [
+    { id: 'S1', text: 'Have we conducted a failure mode analysis (what could go wrong)?' },
+    { id: 'S2', text: 'Have we assessed the "blast radius" of agent errors or compromise?' },
+    { id: 'S3', text: 'Have we conducted security testing (red-teaming, adversarial testing)?' },
+    { id: 'S4', text: 'Are there emergency stop mechanisms we can activate quickly?' },
+    { id: 'S5', text: 'Is there a rollback plan if the agent causes harm?' },
+    { id: 'S6', text: 'Do we monitor for anomalous agent behavior in real-time?' },
+    { id: 'S7', text: 'Are safeguards proportional to the risk level of agent actions?' },
+    { id: 'S8', text: 'Have we tested our ability to shut down the agent safely?' }
+  ],
+  responsibility: [
+    { id: 'R1', text: 'Is there a clear accountability chain for agent actions?' },
+    { id: 'R2', text: 'Are all agent actions logged comprehensively?' },
+    { id: 'R3', text: 'Can we trace every action back to its decision point?' },
+    { id: 'R4', text: 'Is there an incident response plan specific to agent failures?' },
+    { id: 'R5', text: 'Have we tested our incident response plan?' },
+    { id: 'R6', text: 'Is there a process for redressing harm caused by agent actions?' },
+    { id: 'R7', text: 'Do we retain logs long enough for investigation and audit?' },
+    { id: 'R8', text: 'Are stakeholders informed about agent actions that affect them?' }
+  ]
+};
+
+function switchTab(tabName) {
+  if (tabName !== 'instructions' && tabName !== 'phase0' && tabName !== 'gate' && !phase1Unlocked) {
+    if (['governance', 'ethics', 'safety', 'responsibility', 'dashboard', 'action'].includes(tabName)) {
+      alert('🔒 Complete Phase 0 assessment and pass the Decision Gate to unlock Phase 1');
+      return;
+    }
+  }
+  
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  document.querySelector('[data-tab="' + tabName + '"]').classList.add('active');
+  
+  if (tabName === 'gate') evaluatePhase0();
+  if (tabName === 'dashboard') updateDashboard();
+  
+  updateProgress();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    const tabName = this.getAttribute('data-tab');
+    switchTab(tabName);
+  });
+});
+
+document.querySelectorAll('.rating-option').forEach(option => {
+  option.addEventListener('click', function() {
+    const question = this.getAttribute('data-question');
+    const value = parseInt(this.getAttribute('data-value'));
+    const isRedFlag = this.getAttribute('data-redflag') === 'true';
+    
+    document.querySelectorAll(`[data-question="${question}"]`).forEach(opt => {
+      opt.classList.remove('selected');
+    });
+    this.classList.add('selected');
+    
+    phase0Data[question] = value;
+    
+    const redflagDiv = document.getElementById('redflag-' + question);
+    if (isRedFlag && redflagDiv) {
+      redflagDiv.classList.add('show');
+      if (!phase0RedFlags.includes(question)) {
+        phase0RedFlags.push(question);
+      }
+    } else if (redflagDiv) {
+      redflagDiv.classList.remove('show');
+      phase0RedFlags = phase0RedFlags.filter(f => f !== question);
+    }
+    
+    updatePhase0Summary();
+    markTabCompleted('phase0');
+  });
+});
+
+function updatePhase0Summary() {
+  const answered = Object.keys(phase0Data).length;
+  const score = Object.values(phase0Data).reduce((sum, val) => sum + val, 0);
+  
+  document.getElementById('phase0-progress').textContent = `${answered} / 12 questions answered`;
+  document.getElementById('phase0-current').textContent = `${score} / 48 points`;
+  document.getElementById('phase0-redflags').textContent = `${phase0RedFlags.length} detected`;
+}
+
+function evaluatePhase0() {
+  const answered = Object.keys(phase0Data).length;
+  const score = Object.values(phase0Data).reduce((sum, val) => sum + val, 0);
+  const redFlagCount = phase0RedFlags.length;
+  
+  document.getElementById('gate-score').textContent = `${score} / 48`;
+  document.getElementById('gate-answered').textContent = `${answered} / 12`;
+  document.getElementById('gate-redflags-count').textContent = redFlagCount;
+  
+  let maturity = '';
+  if (score >= 40) maturity = 'Advanced';
+  else if (score >= 32) maturity = 'Developing';
+  else if (score >= 24) maturity = 'Basic';
+  else if (score >= 16) maturity = 'Initial';
+  else maturity = 'Ad-hoc';
+  
+  document.getElementById('gate-maturity').textContent = maturity;
+  
+  const passed = score >= 40 && redFlagCount === 0 && answered === 12;
+  
+  if (answered < 12) {
+    document.getElementById('gate-icon').textContent = '⏳';
+    document.getElementById('gate-status').textContent = 'Incomplete';
+    document.getElementById('gate-status').className = 'gate-status';
+    document.getElementById('gate-message').textContent = `Please complete all ${12 - answered} remaining questions in Phase 0 before proceeding.`;
+    document.getElementById('gate-pass-message').style.display = 'none';
+    document.getElementById('gate-fail-message').style.display = 'none';
+    document.getElementById('gate-proceed-btn').style.display = 'none';
+    document.getElementById('gate-stop-btn').style.display = 'none';
+    return;
+  }
+  
+  if (passed) {
+    document.getElementById('gate-icon').textContent = '✅';
+    document.getElementById('gate-status').textContent = 'PASS - PROCEED TO PHASE 1';
+    document.getElementById('gate-status').className = 'gate-status pass';
+    document.getElementById('gate-message').textContent = 'Your process has passed economic and process validation.';
+    document.getElementById('gate-pass-message').style.display = 'block';
+    document.getElementById('gate-fail-message').style.display = 'none';
+    document.getElementById('gate-proceed-btn').style.display = 'inline-block';
+    document.getElementById('gate-stop-btn').style.display = 'none';
+    document.getElementById('gate-redflag-list').style.display = 'none';
+  } else {
+    document.getElementById('gate-icon').textContent = '🛑';
+    document.getElementById('gate-status').textContent = 'STOP - NOT READY';
+    document.getElementById('gate-status').className = 'gate-status fail';
+    
+    let reason = '';
+    if (score < 40) reason = `Score too low (${score}/48 - need 40+)`;
+    if (redFlagCount > 0) reason += (reason ? ' and ' : '') + `${redFlagCount} red flag(s) detected`;
+    
+    document.getElementById('gate-message').textContent = `Reason: ${reason}`;
+    document.getElementById('gate-pass-message').style.display = 'none';
+    document.getElementById('gate-fail-message').style.display = 'block';
+    document.getElementById('gate-proceed-btn').style.display = 'none';
+    document.getElementById('gate-stop-btn').style.display = 'inline-block';
+    
+    if (redFlagCount > 0) {
+      document.getElementById('gate-redflag-list').style.display = 'block';
+      const redflagItems = document.getElementById('gate-redflag-items');
+      redflagItems.innerHTML = '';
+      phase0RedFlags.forEach(flag => {
+        const div = document.createElement('div');
+        div.className = 'red-flag-item';
+        div.innerHTML = `<strong>Question ${flag}:</strong> Critical gap identified`;
+        redflagItems.appendChild(div);
+      });
+    } else {
+      document.getElementById('gate-redflag-list').style.display = 'none';
+    }
+  }
+}
+
+function unlockPhase1() {
+  phase1Unlocked = true;
+  document.querySelectorAll('.tab.locked').forEach(tab => {
+    tab.classList.remove('locked');
+  });
+  markTabCompleted('gate');
+  buildPhase1Questions();
+  alert('✅ Phase 1 unlocked! You may now proceed to assess Governance, Ethics, Safety, and Responsibility.');
+  switchTab('governance');
+}
+
+function showRecommendations() {
+  switchTab('action');
+}
+
+function buildPhase1Questions() {
+  ['governance', 'ethics', 'safety', 'responsibility'].forEach(lens => {
+    const container = document.getElementById(`${lens}-questions`);
+    container.innerHTML = '';
+    
+    phase1Questions[lens].forEach((q, idx) => {
+      const card = document.createElement('div');
+      card.className = 'question-card';
+      card.innerHTML = `
+        <div class="question-text">${q.id}. ${q.text}</div>
+        <div class="rating-options">
+          <div class="rating-option" data-phase1="${lens}" data-idx="${idx}" data-value="0">
+            <span class="rating-value">NO (0)</span>
+            <span class="rating-label">Does not exist</span>
+          </div>
+          <div class="rating-option" data-phase1="${lens}" data-idx="${idx}" data-value="1">
+            <span class="rating-value">PARTIAL (1)</span>
+            <span class="rating-label">Incomplete</span>
+          </div>
+          <div class="rating-option" data-phase1="${lens}" data-idx="${idx}" data-value="2">
+            <span class="rating-value">YES (2)</span>
+            <span class="rating-label">Fully in place</span>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+    
+    document.querySelectorAll(`[data-phase1="${lens}"]`).forEach(option => {
+      option.addEventListener('click', function() {
+        const lens = this.getAttribute('data-phase1');
+        const idx = this.getAttribute('data-idx');
+        const value = parseInt(this.getAttribute('data-value'));
+        
+        document.querySelectorAll(`[data-phase1="${lens}"][data-idx="${idx}"]`).forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        this.classList.add('selected');
+        
+        phase1Data[lens][idx] = value;
+        updatePhase1Scores();
+        markTabCompleted(lens);
+      });
+    });
+  });
+}
+
+function updatePhase1Scores() {
+  ['governance', 'ethics', 'safety', 'responsibility'].forEach(lens => {
+    const score = Object.values(phase1Data[lens]).reduce((sum, val) => sum + (val || 0), 0);
+    const elem = document.getElementById(`${lens === 'governance' ? 'gov' : lens === 'ethics' ? 'eth' : lens === 'safety' ? 'saf' : 'res'}-score`);
+    if (elem) elem.textContent = `${score} / 16`;
+  });
+}
+
+function updateDashboard() {
+  const p0Score = Object.values(phase0Data).reduce((sum, val) => sum + val, 0);
+  const p0Answered = Object.keys(phase0Data).length;
+  
+  document.getElementById('dash-p0-score').textContent = p0Score;
+  document.getElementById('dash-p0-redflags').textContent = phase0RedFlags.length;
+  
+  let p0Maturity = '';
+  if (p0Score >= 40) p0Maturity = 'Advanced';
+  else if (p0Score >= 32) p0Maturity = 'Developing';
+  else if (p0Score >= 24) p0Maturity = 'Basic';
+  else if (p0Score >= 16) p0Maturity = 'Initial';
+  else p0Maturity = 'Ad-hoc';
+  
+  document.getElementById('dash-p0-maturity').textContent = p0Maturity;
+  
+  const p0Passed = p0Score >= 40 && phase0RedFlags.length === 0 && p0Answered === 12;
+  document.getElementById('dash-p0-status').textContent = p0Answered < 12 ? 'Incomplete' : p0Passed ? 'PASS' : 'FAIL';
+  document.getElementById('dash-p0-status').style.color = p0Passed ? '#10b981' : '#ef4444';
+  
+  ['governance', 'ethics', 'safety', 'responsibility'].forEach(lens => {
+    const score = Object.values(phase1Data[lens]).reduce((sum, val) => sum + (val || 0), 0);
+    const short = lens === 'governance' ? 'gov' : lens === 'ethics' ? 'eth' : lens === 'safety' ? 'saf' : 'res';
+    document.getElementById(`dash-${short}`).textContent = score;
+  });
+  
+  const p1Total = Object.values(phase1Data).reduce((sum, lens) => 
+    sum + Object.values(lens).reduce((s, v) => s + (v || 0), 0), 0);
+  document.getElementById('dash-p1-total').textContent = `${p1Total} / 64`;
+  
+  let p1Maturity = '';
+  if (p1Total >= 43) p1Maturity = 'Ready - Mature Governance';
+  else if (p1Total >= 22) p1Maturity = 'Caution - Partially Ready';
+  else p1Maturity = 'Critical - Not Ready';
+  
+  document.getElementById('dash-p1-maturity').textContent = phase1Unlocked ? p1Maturity : 'Phase 1 Locked';
+  
+  const recDiv = document.getElementById('dash-recommendation');
+  if (!p0Passed) {
+    recDiv.className = 'error-box';
+    recDiv.innerHTML = '<h3>🛑 Recommendation: Stop</h3><p>Address Phase 0 gaps before proceeding with agent development.</p>';
+  } else if (!phase1Unlocked) {
+    recDiv.className = 'info-box';
+    recDiv.innerHTML = '<h3>✅ Phase 0 Complete</h3><p>Proceed to Phase 1 to assess operational readiness.</p>';
+  } else if (p1Total >= 43) {
+    recDiv.className = 'success-box';
+    recDiv.innerHTML = '<h3>✅ Ready for Deployment</h3><p>Strong readiness across both economic validation and operational governance. Proceed with deployment planning.</p>';
+  } else if (p1Total >= 22) {
+    recDiv.className = 'warning-box';
+    recDiv.innerHTML = '<h3>⚠️ Proceed with Caution</h3><p>Economics are sound, but governance gaps exist. Increase oversight and address priority gaps before deployment.</p>';
+  } else {
+    recDiv.className = 'error-box';
+    recDiv.innerHTML = '<h3>🛑 Not Ready</h3><p>Significant operational governance gaps. Build foundational capabilities before deployment.</p>';
+  }
+}
+
+function updateProgress() {
+  const p0Complete = Object.keys(phase0Data).length === 12;
+  const p1Complete = phase1Unlocked && Object.values(phase1Data).every(lens => Object.keys(lens).length === 8);
+  
+  let progress = 0;
+  if (p0Complete && p1Complete) progress = 100;
+  else if (p0Complete) progress = 50;
+  else progress = (Object.keys(phase0Data).length / 12) * 50;
+  
+  document.getElementById('overall-progress').style.width = progress + '%';
+}
+
+function markTabCompleted(tabName) {
+  const tab = document.querySelector(`[data-tab="${tabName}"]`);
+  if (tab && !tab.classList.contains('completed')) {
+    tab.classList.add('completed');
+  }
+}
+
+function saveProgress() {
+  try {
+    localStorage.setItem('agenticAssessment', JSON.stringify({
+      phase0Data,
+      phase1Data,
+      phase0RedFlags,
+      phase1Unlocked,
+      timestamp: new Date().toISOString()
+    }));
+    alert('✅ Progress saved! You can resume this assessment later.');
+  } catch (e) {
+    alert('⚠️ Could not save progress. Please ensure browser storage is enabled.');
+  }
+}
+
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem('agenticAssessment');
+    if (saved) {
+      const data = JSON.parse(saved);
+      const date = new Date(data.timestamp).toLocaleDateString();
+      if (confirm(`Resume previous assessment from ${date}?`)) {
+        Object.assign(phase0Data, data.phase0Data);
+        Object.assign(phase1Data, data.phase1Data);
+        phase0RedFlags = data.phase0RedFlags || [];
+        phase1Unlocked = data.phase1Unlocked || false;
+        
+        document.querySelectorAll('.rating-option').forEach(option => {
+          const question = option.getAttribute('data-question');
+          const value = parseInt(option.getAttribute('data-value'));
+          if (phase0Data[question] === value) {
+            option.classList.add('selected');
+          }
+        });
+        
+        if (phase1Unlocked) {
+          unlockPhase1();
+        }
+        
+        updatePhase0Summary();
+        updateProgress();
+        alert('✅ Previous assessment restored!');
+      }
+    }
+  } catch (e) {
+    console.error('Error loading progress:', e);
+  }
+}
+
+function saveActionPlan() {
+  try {
+    const plan = {
+      phase0Gaps: document.querySelector('[placeholder*="Phase 0"]').value,
+      phase1Gaps: document.querySelector('[placeholder*="Phase 1"]').value,
+      roadmap30: document.getElementById('roadmap-30').value,
+      roadmap60: document.getElementById('roadmap-60').value,
+      roadmap90: document.getElementById('roadmap-90').value,
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('actionPlan', JSON.stringify(plan));
+    alert('✅ Action plan saved!');
+  } catch (e) {
+    alert('⚠️ Could not save action plan.');
+  }
+}
+
+function loadActionPlan() {
+  try {
+    const saved = localStorage.getItem('actionPlan');
+    if (saved) {
+      const plan = JSON.parse(saved);
+      if (document.querySelector('[placeholder*="Phase 0"]')) {
+        document.querySelector('[placeholder*="Phase 0"]').value = plan.phase0Gaps || '';
+      }
+      if (document.querySelector('[placeholder*="Phase 1"]')) {
+        document.querySelector('[placeholder*="Phase 1"]').value = plan.phase1Gaps || '';
+      }
+      if (document.getElementById('roadmap-30')) {
+        document.getElementById('roadmap-30').value = plan.roadmap30 || '';
+      }
+      if (document.getElementById('roadmap-60')) {
+        document.getElementById('roadmap-60').value = plan.roadmap60 || '';
+      }
+      if (document.getElementById('roadmap-90')) {
+        document.getElementById('roadmap-90').value = plan.roadmap90 || '';
+      }
+    }
+  } catch (e) {
+    console.error('Error loading action plan:', e);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  loadProgress();
+  updatePhase0Summary();
+  updateProgress();
+  
+  setTimeout(() => {
+    loadActionPlan();
+  }, 500);
+});
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9975acf4e9d26141","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"e72945439c264b3b85d2e3b689102d27"}' crossorigin="anonymous"></script>
+</body>
+</html>
